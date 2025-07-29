@@ -3,14 +3,14 @@ pipeline {
 
     environment {
         DOCKER_HUB_USER = "atharvab3"
-        IMAGE_NAME = "myapp"
+        IMAGE_NAME = "atharvab3/myapp:${GIT_COMMIT}"
     }
 
     stages {
         stage('Checkout') {
             steps {
                 checkout([$class: 'GitSCM', branches: [[name: '*/develop']],
-                          userRemoteConfigs: [[url: 'https://github.com/<your-repo>.git']]])
+                          userRemoteConfigs: [[url: 'https://github.com/abakshi393/devops-case-study2.git']]])
             }
         }
 

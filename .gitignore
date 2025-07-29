@@ -1,0 +1,27 @@
+cat <<EOF > .gitignore
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Docker
+*.log
+*.tmp
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Ansible
+*.retry
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.pem
+.env
+EOF

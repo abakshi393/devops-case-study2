@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_USER = "atharvab3"
         IMAGE_NAME = "atharvab3/myapp:${GIT_COMMIT}"
     }
 
@@ -16,8 +15,10 @@ pipeline {
 
         stage('Build & Dockerize') {
             steps {
-                sh 'chmod +x scripts/build_and_push.sh'
-                sh './scripts/build_and_push.sh'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+                    sh 'chmod +x scripts/build_and_push.sh'
+                    sh './scripts/build_and_push.sh'
+                }
             }
         }
 

@@ -26,7 +26,7 @@ pipeline {
             steps {
                 dir('infra') {
                     sh 'terraform init'
-                    sh 'terraform apply -auto-approve -var="key_name=terraform-key"'
+                    sh 'terraform apply -auto-approve -var="key_name=New-key"'
                 }
             }
         }

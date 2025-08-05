@@ -23,13 +23,17 @@ pipeline {
         }
 
         stage('Terraform Apply') {
-            steps {
-                dir('infra') {
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve -var="key_name=New-key"'
-                }
-            }
-        }
+             steps {
+                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+                           credentialsId: 'aws-creds']]) {
+                     dir('infra') {
+                       sh 'terraform init'
+                       sh 'terraform apply -auto-approve -var="key_name=New-key"'
+                     }
+                   }
+               }
+          }
+
 
         stage('Deploy with Ansible') {
             steps {

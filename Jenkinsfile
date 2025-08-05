@@ -28,7 +28,7 @@ pipeline {
                            credentialsId: 'aws-creds']]) {
                      dir('infra') {
                        sh 'terraform init'
-                       sh 'terraform apply -auto-approve -var="key_name=New-key"'
+                       sh 'terraform apply -auto-approve -input=false'
                      }
                    }
                }

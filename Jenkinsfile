@@ -9,7 +9,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 git branch: 'develop', 
-                url: 'https://github.com/rahulbhatia3422/devops-nodejs-app.git'
+                url: 'https://github.com/abakshi393/devops-case-study2.git'
                 script {
                     // Store Git commit hash right after cloning
                     env.GIT_COMMIT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
@@ -21,7 +21,7 @@ pipeline {
             steps {
                 withCredentials([[
                     $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-cred',
+                    credentialsId: 'aws-creds',
                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                 ]]) {
@@ -40,7 +40,7 @@ pipeline {
                     sh 'docker buildx install || true'
                     withCredentials([
                         usernamePassword(
-                            credentialsId: 'dockerhub-credentials',
+                            credentialsId: 'docker-hub-creds',
                             usernameVariable: 'DOCKER_USERNAME',
                             passwordVariable: 'DOCKER_PASSWORD'
                         )
@@ -84,7 +84,7 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'
             steps {
                 withCredentials([
                     sshUserPrivateKey(
-                        credentialsId: 'aws-ec2-ssh-key',
+                        credentialsId: 'ansible',
                         keyFileVariable: 'SSH_KEY_PATH'
                     )
                 ]) {

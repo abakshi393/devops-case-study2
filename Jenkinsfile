@@ -19,7 +19,7 @@ pipeline {
 
         stage('Terraform Init & Apply') {
             steps {
-                withCredentials([[
+                withCredentials([[ 
                     $class: 'AmazonWebServicesCredentialsBinding',
                     credentialsId: 'aws-creds',
                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
@@ -57,48 +57,38 @@ pipeline {
             }
         }
 
-        stage('Prepare Ansible') {
-            steps {
-                script {
-                    // Get EC2 public IP from Terraform output (matches your Terraform output name)
-                    env.EC2_IP = sh(
-                        script: "cd infra && terraform output -raw instance_public_ip", 
-                        returnStdout: true
-                    ).trim()
-
-                    // Create ansible inventory file
-                    sh 'mkdir -p ansible'
-                    writeFile file: 'ansible/hosts.ini', text: """
-[ec2]
-${env.EC2_IP} ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY_PATH
-
-[ec2:vars]
-ansible_python_interpreter=/usr/bin/python3
-ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-"""
-                    sh 'cat ansible/hosts.ini'
-                }
-            }
-        }
-
-        stage('Run Ansible Playbook') {
+        stage('Prepare & Run Ansible') {
             steps {
                 withCredentials([
                     sshUserPrivateKey(
-                        credentialsId: 'ansible',
-                        keyFileVariable: 'SSH_KEY_PATH'
+                        credentialsId: 'ansible', // Ensure this matches your Jenkins credentials ID
+                        keyFileVariable: 'SSH_KEY_PATH',
+                        usernameVariable: 'SSH_USER' // This will inject username (usually ec2-user or ubuntu)
                     )
                 ]) {
                     script {
+                        // Get EC2 public IP from Terraform output
+                        env.EC2_IP = sh(
+                            script: "cd infra && terraform output -raw instance_public_ip", 
+                            returnStdout: true
+                        ).trim()
+
+                        // Create Ansible inventory file dynamically
+                        sh '''
+                            mkdir -p ansible
+                            echo "[ec2]" > ansible/hosts.ini
+                            echo "${EC2_IP} ansible_user=${SSH_USER} ansible_ssh_private_key_file=${SSH_KEY_PATH} ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> ansible/hosts.ini
+                            cat ansible/hosts.ini
+                        '''
+
+                        // Run Ansible playbook
                         try {
                             sh """
                                 mkdir -p ~/.ssh
-                                chmod 600 $SSH_KEY_PATH
-                                ssh-keyscan -H ${env.EC2_IP} >> ~/.ssh/known_hosts
+                                chmod 600 ${SSH_KEY_PATH}
+                                ssh-keyscan -H ${EC2_IP} >> ~/.ssh/known_hosts
                                 ansible-playbook -i ansible/hosts.ini ansible/deploy.yml \
-                                    --private-key=$SSH_KEY_PATH \
-                                    -u ubuntu \
-                                    -e "GIT_COMMIT=${env.GIT_COMMIT}"
+                                    -e "GIT_COMMIT=${GIT_COMMIT}"
                             """
                         } catch (Exception e) {
                             error "❌ Ansible deployment failed: ${e.getMessage()}"

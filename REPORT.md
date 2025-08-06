@@ -7,7 +7,7 @@ This report documents the implementation of a fully automated DevOps CI/CD pipel
 
 ## 🔗 GitHub Repository
 
-🔗 **Repository URL**: [https://github.com/rahulbhatia3422/devops-nodejs-app](https://github.com/rahulbhatia3422/devops-nodejs-app)  
+🔗 **Repository URL**: https://github.com/abakshi393/devops-case-study2.git 
 📌 Branch Used: `develop`  
 🛠️ All scripts, configs, Terraform files, and Jenkinsfile are included.
 
@@ -15,7 +15,7 @@ This report documents the implementation of a fully automated DevOps CI/CD pipel
 
 ## 1️⃣ Architecture Diagram
 
-![DevOps Architecture](assets/architecture_diagram.png)
+![DevOps Architecture](assets/architecture_diagram.png.png)
 
 **Flow Summary:**
 - Code is pushed to GitHub → Pull/Merge Requests are created

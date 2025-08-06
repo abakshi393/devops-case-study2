@@ -78,7 +78,7 @@ resource "aws_security_group" "web_sg" {
 
 # Create EC2 Instance
 resource "aws_instance" "web_server" {
-  ami                    = "ami-08e5424edfe926b43" # Amazon Linux 2 (ap-south-1)
+  ami                    = "ami-0a0f1259dd1c90938"  
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public_subnet.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]

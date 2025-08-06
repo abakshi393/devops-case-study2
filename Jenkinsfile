@@ -9,9 +9,9 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 git branch: 'develop', 
-                url: 'https://github.com/abakshi393/devops-case-study2.git'
+                    url: 'https://github.com/abakshi393/devops-case-study2.git'
                 script {
-                    // Store Git commit hash right after cloning
+                    // Store Git commit hash
                     env.GIT_COMMIT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                 }
             }
@@ -26,9 +26,11 @@ pipeline {
                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                 ]]) {
                     dir('infra') {
-                        sh 'terraform init -input=false'
-                        sh 'terraform validate'
-                        sh 'terraform apply -auto-approve -input=false'
+                        sh '''
+                            terraform init -input=false
+                            terraform validate
+                            terraform apply -auto-approve -input=false
+                        '''
                     }
                 }
             }
@@ -40,13 +42,13 @@ pipeline {
                     sh 'docker buildx install || true'
                     withCredentials([
                         usernamePassword(
-                            credentialsId: '4bba3617-ac23-48a1-8d12-c496f75496fc',
-                            usernameVariable: 'DOCKER_USERNAME',
-                            passwordVariable: 'DOCKER_PASSWORD'
+                            credentialsId: 'dockerhub-creds',
+                            usernameVariable: 'DOCKERHUB_USER',
+                            passwordVariable: 'DOCKERHUB_PASS'
                         )
                     ]) {
                         sh '''
-                            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+                            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
                             chmod +x scripts/build_and_push.sh
                             ./scripts/build_and_push.sh ${GIT_COMMIT}
                         '''
@@ -58,18 +60,17 @@ pipeline {
         stage('Prepare Ansible') {
             steps {
                 script {
-                    // Get EC2 public IP from Terraform
+                    // Get EC2 public IP from Terraform output (matches your Terraform output name)
                     env.EC2_IP = sh(
-                        script: "cd infra && terraform output -raw public_ip", 
+                        script: "cd infra && terraform output -raw instance_public_ip", 
                         returnStdout: true
                     ).trim()
 
-                    // Create ansible directory and hosts.ini
+                    // Create ansible inventory file
                     sh 'mkdir -p ansible'
-
                     writeFile file: 'ansible/hosts.ini', text: """
 [ec2]
-${env.EC2_IP} ansible_user=ubuntu
+${env.EC2_IP} ansible_user=ubuntu ansible_ssh_private_key_file=$SSH_KEY_PATH
 
 [ec2:vars]
 ansible_python_interpreter=/usr/bin/python3
@@ -100,11 +101,23 @@ ansible_ssh_common_args='-o StrictHostKeyChecking=no'
                                     -e "GIT_COMMIT=${env.GIT_COMMIT}"
                             """
                         } catch (Exception e) {
-                            error "Ansible deployment failed: ${e.getMessage()}"
+                            error "❌ Ansible deployment failed: ${e.getMessage()}"
                         }
                     }
                 }
             }
+        }
+    }
+
+    post {
+        always {
+            echo "Pipeline execution completed."
+        }
+        failure {
+            echo "❌ Pipeline failed. Check logs for details."
+        }
+        success {
+            echo "✅ Deployment completed successfully!"
         }
     }
 }

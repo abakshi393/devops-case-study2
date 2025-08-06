@@ -42,11 +42,5 @@
         name: atharvab3/myapp:0ddf56c
         source: pull
 
-    - name: Run the Docker container (map port 80→3000)
-      docker_container:
-        name: node_app
-        image: atharvab3/myapp:0ddf56c
-        state: started
-        restart_policy: always
-        published_ports:
-          - "80:3000"
+    - name: Run Docker container
+      shell: "docker run -d --name {{ CONTAINER_NAME }} -p 80:{{ APP_PORT }} {{ IMAGE }}"

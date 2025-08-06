@@ -61,9 +61,8 @@ pipeline {
             steps {
                 withCredentials([
                     sshUserPrivateKey(
-                        credentialsId: 'ansible', // Ensure this matches your Jenkins credentials ID
-                        keyFileVariable: 'SSH_KEY_PATH',
-                        usernameVariable: 'SSH_USER' // This will inject username (usually ec2-user or ubuntu)
+                        credentialsId: 'ansible', // Matches your Jenkins credentials ID
+                        keyFileVariable: 'SSH_KEY_PATH'
                     )
                 ]) {
                     script {
@@ -77,7 +76,7 @@ pipeline {
                         sh '''
                             mkdir -p ansible
                             echo "[ec2]" > ansible/hosts.ini
-                            echo "${EC2_IP} ansible_user=${SSH_USER} ansible_ssh_private_key_file=${SSH_KEY_PATH} ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> ansible/hosts.ini
+                            echo "${EC2_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_KEY_PATH} ansible_ssh_common_args='-o StrictHostKeyChecking=no'" >> ansible/hosts.ini
                             cat ansible/hosts.ini
                         '''
 
@@ -88,6 +87,8 @@ pipeline {
                                 chmod 600 ${SSH_KEY_PATH}
                                 ssh-keyscan -H ${EC2_IP} >> ~/.ssh/known_hosts
                                 ansible-playbook -i ansible/hosts.ini ansible/deploy.yml \
+                                    --private-key=${SSH_KEY_PATH} \
+                                    -u ubuntu \
                                     -e "GIT_COMMIT=${GIT_COMMIT}"
                             """
                         } catch (Exception e) {

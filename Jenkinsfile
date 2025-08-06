@@ -42,7 +42,7 @@ pipeline {
                     sh 'docker buildx install || true'
                     withCredentials([
                         usernamePassword(
-                            credentialsId: 'dockerhub-creds',
+                            credentialsId: '4bba3617-ac23-48a1-8d12-c496f75496fc',
                             usernameVariable: 'DOCKERHUB_USER',
                             passwordVariable: 'DOCKERHUB_PASS'
                         )

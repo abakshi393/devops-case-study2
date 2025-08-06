@@ -15,7 +15,7 @@ This report documents the implementation of a fully automated DevOps CI/CD pipel
 
 ## 1️⃣ Architecture Diagram
 
-![DevOps Architecture](assets/architecture_diagram.png.png)
+![DevOps Architecture](asset/architecture_diagram.png.png)
 
 **Flow Summary:**
 - Code is pushed to GitHub → Pull/Merge Requests are created
@@ -37,7 +37,7 @@ This report documents the implementation of a fully automated DevOps CI/CD pipel
 - Pull requests are enforced for merging into `main`
 - Review-based merges demonstrate GitHub collaboration and control
   
-![Branching](assets/Branching.jpg)
+![Branching](asset/Branching.jpg.png)
 
 ---
 
@@ -58,7 +58,7 @@ cd infra
 terraform init
 terraform apply -auto-approve
 ```
-![Infrastructure(ec2)](assets/infrastructure.jpg)
+![Infrastructure(ec2)](asset/infrastructure.jpg.png)
 
 ---
 
@@ -68,7 +68,7 @@ terraform apply -auto-approve
 - Stages: checkout, build, terraform, deploy
 - Screenshot:
   
-![pipeline](assets/jenkins_pipeline.jpg)
+![pipeline](asset/jenkins_pipeline.png.png)
 
 ---
 
@@ -77,7 +77,7 @@ terraform apply -auto-approve
 This is the final output of the deployed Node.js web application running on the AWS EC2 instance. The application was accessed via the public IP on port 80 after successful deployment using Jenkins, Terraform, Docker, and Ansible.
 
 📷 **Deployed App Screenshot**  
-![Web App Output](assets/web_app_output.jpg)
+![Web App Output](asset/web_app_output.jpg.png)
 
 
 

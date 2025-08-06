@@ -4,7 +4,7 @@
   become: yes
 
   vars:
-    IMAGE: "atharvab3/devops-nodejs-app:{{ (GIT_COMMIT | default('latest')) }}"
+    IMAGE: "atharvab3/myapp:{{ (GIT_COMMIT | default('latest')) }}"
     CONTAINER_NAME: devops-app
     APP_PORT: 3000
 

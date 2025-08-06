@@ -1,18 +1,20 @@
-# Using official Node.js base image
+# Use official Node.js base image
 FROM node:18-alpine
 
-# Setting working directory
+# Set working directory
 WORKDIR /app
 
-# Copying package files first to install dependencies
-COPY src/package*.json ./
+# Copy package.json and package-lock.json from root
+COPY package*.json ./
+
+# Install dependencies
 RUN npm install
 
-# Copying the rest of the app
-COPY src/ .
+# Copy the rest of the application
+COPY . .
 
-# Exposing port 3000
+# Expose the port
 EXPOSE 3000
 
-# Starting the app
-CMD ["node", "start"]
+# Start the application using npm script
+CMD ["npm", "start"]

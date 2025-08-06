@@ -1,9 +1,10 @@
 {
-  "name": "src",
+  "name": "devops-case-study2",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "description": "Node.js case study app",
+  "main": "src/app.js",
   "scripts": {
+    "start": "node src/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

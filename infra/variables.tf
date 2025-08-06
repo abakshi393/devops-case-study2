@@ -8,4 +8,5 @@ variable "instance_type" {
 
 variable "key_name" {
   description = "Name of the EC2 Key Pair to SSH into instance"
+  default = "New-key"
 }

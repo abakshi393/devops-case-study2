@@ -5,9 +5,7 @@ provider "aws" {
 # VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
-  tags = {
-    Name = "myapp-vpc"
-  }
+  tags = { Name = "myapp-vpc" }
 }
 
 # Subnet
@@ -16,31 +14,23 @@ resource "aws_subnet" "public" {
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "${var.region}a"
   map_public_ip_on_launch = true
-  tags = {
-    Name = "myapp-public-subnet"
-  }
+  tags = { Name = "myapp-public-subnet" }
 }
 
 # Internet Gateway
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main.id
-  tags = {
-    Name = "myapp-igw"
-  }
+  tags = { Name = "myapp-igw" }
 }
 
 # Route Table
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
-
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.gw.id
   }
-
-  tags = {
-    Name = "myapp-public-rt"
-  }
+  tags = { Name = "myapp-public-rt" }
 }
 
 # Route Table Association
@@ -76,9 +66,7 @@ resource "aws_security_group" "instance" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "sg-ssh-http"
-  }
+  tags = { Name = "sg-ssh-http" }
 }
 
 # EC2 Instance
@@ -94,17 +82,11 @@ resource "aws_instance" "app" {
     volume_type = "gp3"
   }
 
-  tags = {
-    Name = "devops-nodejs-ec2"
-  }
+  tags = { Name = "devops-nodejs-ec2" }
 }
 
 # Elastic IP
-resource "aws_eip" "app"_instance.app.id
+resource "aws_eip" "app" {
+  instance = aws_instance.app.id
   depends_on = [aws_instance.app]
-}
-
-# Output the public IP
-output "instance_public_ip" {
-  value = aws_eip.app.public_ip
 }

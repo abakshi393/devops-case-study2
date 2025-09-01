@@ -77,7 +77,7 @@ terraform apply -auto-approve
 This is the final output of the deployed Node.js web application running on the AWS EC2 instance. The application was accessed via the public IP on port 80 after successful deployment using Jenkins, Terraform, Docker, and Ansible.
 
 📷 **Deployed App Screenshot**  
-![Web App Output](asset/Screenshot2025-09-01220258.png)
+![Web App Output](asset/web_app_output.jpg.png)
 
 
 

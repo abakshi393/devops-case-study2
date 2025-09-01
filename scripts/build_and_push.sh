@@ -3,24 +3,26 @@ set -euo pipefail
 
 echo "[INFO] Starting Docker build and push process..."
 
-# Get the latest commit hash for tagging
-GIT_COMMIT=$(git rev-parse --short HEAD)
-IMAGE="atharvab3/myapp:${GIT_COMMIT}"
+# Take commit hash from Jenkins pipeline
+if [ -z "${1:-}" ]; then
+  echo "[ERROR] Commit hash not provided!"
+  exit 1
+fi
+
+COMMIT_HASH=$1
+IMAGE="atharvab3/myapp:${COMMIT_HASH}"
 
 # Build the Docker image
 echo "[INFO] Building Docker image: $IMAGE"
-docker build -t $IMAGE .
+docker build -t "$IMAGE" -t "atharvab3/myapp:latest" .
 
-# Log in to Docker Hub (ensure DOCKERHUB_USER and DOCKERHUB_PASS are set as Jenkins credentials)
+# Log in to Docker Hub
 echo "[INFO] Logging into Docker Hub..."
 echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
 
-# Push the image
-echo "[INFO] Pushing Docker image to Docker Hub..."
-docker push $IMAGE
-
-# Optionally, tag as latest
-docker tag $IMAGE atharvab3/myapp:latest
-docker push atharvab3/myapp:latest
+# Push images
+echo "[INFO] Pushing Docker images to Docker Hub..."
+docker push "$IMAGE"
+docker push "atharvab3/myapp:latest"
 
 echo "[INFO] Docker build and push completed successfully."

@@ -1,12 +1,19 @@
-variable "aws_region" {
-  default = "us-east-1"
+variable "region" {
+  description = "AWS region"
+  type        = string
+}
+
+variable "ami_id" {
+  description = "AMI ID for Ubuntu EC2"
+  type        = string
 }
 
 variable "instance_type" {
-  default = "t2.micro"
+  description = "EC2 instance type"
+  type        = string
 }
 
 variable "key_name" {
-  description = "Name of the EC2 Key Pair to SSH into instance"
-  default = "amb"
+  description = "AWS key pair name"
+  type        = string
 }

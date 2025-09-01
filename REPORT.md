@@ -68,7 +68,7 @@ terraform apply -auto-approve
 - Stages: checkout, build, terraform, deploy
 - Screenshot:
   
-![pipeline](asset/jenkins_pipeline.png.png)
+![pipeline](asset/webappoutput.png)
 
 ---
 

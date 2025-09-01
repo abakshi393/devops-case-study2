@@ -1,5 +1,13 @@
-# Output IP
-output "public_ip" {
-  value       = aws_eip.app.public_ip
-  description = "Public IP of EC2"
+# outputs.tf
+
+# Public IP of the EC2 instance
+output "instance_public_ip" {
+  description = "Public IP of the EC2 instance"
+  value       = aws_instance.app.public_ip
+}
+
+# Instance ID (optional)
+output "instance_id" {
+  description = "ID of the EC2 instance"
+  value       = aws_instance.app.id
 }

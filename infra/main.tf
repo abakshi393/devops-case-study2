@@ -1,62 +1,51 @@
 provider "aws" {
-  region = "us-east-1"
+  region = var.region
 }
 
-# Get a list of available Availability Zones in the region
-data "aws_availability_zones" "available" {}
-
-# Create VPC
-resource "aws_vpc" "main_vpc" {
+# VPC
+resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
-  tags = {
-    Name = "main-vpc"
-  }
+  tags = { Name = "myapp-vpc" }
 }
 
-# Create Internet Gateway
-resource "aws_internet_gateway" "main_igw" {
-  vpc_id = aws_vpc.main_vpc.id
-  depends_on = [aws_vpc.main_vpc]
+# Subnet
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "${var.region}a"
+  map_public_ip_on_launch = true
+  tags = { Name = "myapp-public-subnet" }
 }
 
-# Create Route Table
-resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.main_vpc.id
+# Internet Gateway
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.main.id
+  tags = { Name = "myapp-igw" }
+}
 
+# Route Table
+resource "aws_route_table" "public" {
+  vpc_id = aws_vpc.main.id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.main_igw.id
+    gateway_id = aws_internet_gateway.gw.id
   }
-
-  depends_on = [aws_internet_gateway.main_igw]
+  tags = { Name = "myapp-public-rt" }
 }
 
-# Create Public Subnet in the first available AZ
-resource "aws_subnet" "public_subnet" {
-  vpc_id                  = aws_vpc.main_vpc.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = data.aws_availability_zones.available.names[0]
-  map_public_ip_on_launch = true
-
-  depends_on = [aws_vpc.main_vpc]
+# Route Table Association
+resource "aws_route_table_association" "public" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.public.id
 }
 
-# Associate Route Table with Public Subnet
-resource "aws_route_table_association" "public_assoc" {
-  subnet_id      = aws_subnet.public_subnet.id
-  route_table_id = aws_route_table.public_rt.id
-
-  depends_on = [aws_subnet.public_subnet, aws_route_table.public_rt]
-}
-
-# Create Security Group allowing SSH, HTTP, and port 3000
-resource "aws_security_group" "web_sg" {
-  name        = "web-sg"
-  description = "Allow SSH, HTTP, and port 3000"
-  vpc_id      = aws_vpc.main_vpc.id
+# Security Group
+resource "aws_security_group" "instance" {
+  name        = "allow_ssh_http"
+  description = "Allow SSH & HTTP"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "SSH"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -64,17 +53,8 @@ resource "aws_security_group" "web_sg" {
   }
 
   ingress {
-    description = "HTTP"
     from_port   = 80
     to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "App Port"
-    from_port   = 3000
-    to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -86,32 +66,29 @@ resource "aws_security_group" "web_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  depends_on = [aws_vpc.main_vpc]
+  tags = { Name = "sg-ssh-http" }
 }
 
-# Create EC2 Instance
-resource "aws_instance" "web_server" {
-  ami                    = "ami-0a0f1259dd1c90938"  # Make sure this AMI is valid in us-east-1
+# EC2 Instance
+resource "aws_instance" "app" {
+  ami                    = var.ami_id
   instance_type          = var.instance_type
-  subnet_id              = aws_subnet.public_subnet.id
-  vpc_security_group_ids = [aws_security_group.web_sg.id]
+  subnet_id              = aws_subnet.public.id
+  vpc_security_group_ids = [aws_security_group.instance.id]
   key_name               = var.key_name
 
-  depends_on = [aws_subnet.public_subnet, aws_security_group.web_sg]
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+  }
+
+  tags = { Name = "devops-nodejs-ec2" }
 }
 
-# Allocate Elastic IP and attach to instance
-resource "aws_eip" "web_ip" {
-  instance = aws_instance.web_server.id
-
-  depends_on = [aws_instance.web_server]
+# Elastic IP
+resource "aws_eip" "app" {
+  instance = aws_instance.app.id
+  depends_on = [aws_instance.app]
 }
 
-# Outputs
-output "vpc_id" {
-  value = aws_vpc.main_vpc.id
-}
 
-output "instance_public_ip" {
-  value = aws_eip.web_ip.public_ip
-}

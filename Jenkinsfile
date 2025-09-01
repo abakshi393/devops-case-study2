@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // ✅ Set correct AWS region for your keypair and instance
-        AWS_REGION = 'us-east-1'
+        AWS_REGION = 'us-east-1'   // ✅ updated region
     }
 
     stages {
@@ -12,7 +11,7 @@ pipeline {
                 git branch: 'develop', 
                     url: 'https://github.com/abakshi393/devops-case-study2.git'
                 script {
-                    // Store Git commit hash
+                    // ✅ Always use short commit hash
                     env.GIT_COMMIT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                 }
             }
@@ -62,18 +61,16 @@ pipeline {
             steps {
                 withCredentials([
                     sshUserPrivateKey(
-                        credentialsId: 'ansible', // Matches your Jenkins credentials ID
+                        credentialsId: 'ansible',
                         keyFileVariable: 'SSH_KEY_PATH'
                     )
                 ]) {
                     script {
-                        // ✅ Get EC2 public IP from Terraform output
                         env.EC2_IP = sh(
                             script: "cd infra && terraform output -raw instance_public_ip", 
                             returnStdout: true
                         ).trim()
 
-                        // ✅ Create Ansible inventory file dynamically
                         sh '''
                             mkdir -p ansible
                             echo "[ec2]" > ansible/hosts.ini
@@ -81,20 +78,15 @@ pipeline {
                             cat ansible/hosts.ini
                         '''
 
-                        // ✅ Run Ansible playbook
-                        try {
-                            sh """
-                                mkdir -p ~/.ssh
-                                chmod 600 ${SSH_KEY_PATH}
-                                ssh-keyscan -H ${EC2_IP} >> ~/.ssh/known_hosts
-                                ansible-playbook -i ansible/hosts.ini ansible/deploy.yml \
-                                    --private-key=${SSH_KEY_PATH} \
-                                    -u ubuntu \
-                                    -e "GIT_COMMIT=${GIT_COMMIT}"
-                            """
-                        } catch (Exception e) {
-                            error "❌ Ansible deployment failed: ${e.getMessage()}"
-                        }
+                        sh """
+                            mkdir -p ~/.ssh
+                            chmod 600 ${SSH_KEY_PATH}
+                            ssh-keyscan -H ${EC2_IP} >> ~/.ssh/known_hosts
+                            ansible-playbook -i ansible/hosts.ini ansible/deploy.yml \
+                                --private-key=${SSH_KEY_PATH} \
+                                -u ubuntu \
+                                -e "GIT_COMMIT=${GIT_COMMIT}"
+                        """
                     }
                 }
             }

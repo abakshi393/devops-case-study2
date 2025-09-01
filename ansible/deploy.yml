@@ -70,16 +70,4 @@
       shell: "docker run -d --name {{ CONTAINER_NAME }} -p 80:{{ APP_PORT }} {{ IMAGE }}"
 
     # --- CLEANUP SECTION STARTS HERE ---
-    - name: Copy cleanup.sh script to EC2
-      copy:
-        src: ../scripts/cleanup.sh
-        dest: /home/ubuntu/cleanup.sh
-        mode: '0755'
-
-    - name: Run cleanup.sh script on EC2
-      shell: bash /home/ubuntu/cleanup.sh
-      register: cleanup_result
-
-    - name: Show cleanup logs
-      debug:
-        msg: "{{ cleanup_result.stdout_lines }}"
+  

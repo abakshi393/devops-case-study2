@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'ap-south-1'
+        // ✅ Set correct AWS region for your keypair and instance
+        AWS_REGION = 'us-east-1'
     }
 
     stages {
@@ -66,13 +67,13 @@ pipeline {
                     )
                 ]) {
                     script {
-                        // Get EC2 public IP from Terraform output
+                        // ✅ Get EC2 public IP from Terraform output
                         env.EC2_IP = sh(
                             script: "cd infra && terraform output -raw instance_public_ip", 
                             returnStdout: true
                         ).trim()
 
-                        // Create Ansible inventory file dynamically
+                        // ✅ Create Ansible inventory file dynamically
                         sh '''
                             mkdir -p ansible
                             echo "[ec2]" > ansible/hosts.ini
@@ -80,7 +81,7 @@ pipeline {
                             cat ansible/hosts.ini
                         '''
 
-                        // Run Ansible playbook
+                        // ✅ Run Ansible playbook
                         try {
                             sh """
                                 mkdir -p ~/.ssh

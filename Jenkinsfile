@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'us-east-1'   // ✅ updated region
+        AWS_REGION = 'us-east-1'   
     }
 
     stages {
@@ -11,7 +11,7 @@ pipeline {
                 git branch: 'develop', 
                     url: 'https://github.com/abakshi393/devops-case-study2.git'
                 script {
-                    // ✅ Always use short commit hash
+                    
                     env.GIT_COMMIT = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                 }
             }
@@ -98,7 +98,7 @@ pipeline {
             echo "Pipeline execution completed."
         }
         failure {
-            echo "❌ Pipeline failed. Check logs for details."
+            echo " Pipeline failed. Check logs for details."
         }
         success {
             echo "✅ Deployment completed successfully!"

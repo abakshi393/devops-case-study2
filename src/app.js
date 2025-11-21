@@ -7,7 +7,7 @@ app.get('/', (req, res) => {
   res.send(`
     <html>
       <head>
-        <title>DevOps Case Study 2</title>
+        <title>Node.js Application</title>
         <style>
           body {
             margin: 0;
@@ -71,7 +71,7 @@ app.get('/', (req, res) => {
       </head>
       <body>
         <div class="card">
-          <h1>DevOps Case Study 2</h1>
+          <h1>Deploying Nodejs Application on AWS</h1>
           <h3>By Atharva Bakshi</h3>
           <p><strong>Description:</strong> Deploying a Node.js app</p>
           <p><strong>Skills Required:</strong></p>
